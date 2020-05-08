@@ -3,10 +3,10 @@
         "target": "es6",
         "outDir": "app/js",
         "noEmitOnError": true,
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "removeComments": true,
         "module": "System",
-        "strictNullChecks": true,
+        "strictNullChecks": false,
         "experimentalDecorators": true
     },
     "include": [
