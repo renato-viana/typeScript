@@ -1,7 +1,7 @@
 import { NegociacoesView, MensagemView } from "../views/index";
 import { Negociacao, Negociacoes, NegociacaoParcial } from "../models/index";
 import { domInject, throttle } from "../helpers/decorators/index";
-import {NegociacaoService} from "../services/index";
+import { NegociacaoService } from "../services/index";
 import { imprime } from "../helpers/index";
 
 export class NegociacaoController {
@@ -27,7 +27,6 @@ export class NegociacaoController {
 
   @throttle()
   adiciona() {
-
     let data = new Date(this._inputData.val().replace(/-/g, ","));
 
     if (this._ehDiaUtil(data)) {
@@ -60,32 +59,35 @@ export class NegociacaoController {
 
   // API fetch que usa o padrão de projeto Promise, seu uso é mais simplificado do que trabalharmos com XMLHttpRequest.
   @throttle()
-  importaDados() {
-    
-    this._service
-      .obterNegociacoes(res => {
+  async importaDados() {
+
+    try {
+      const negociacoesParaImportar = await this._service
+      .obterNegociacoes((res) => {
+
         if (res.ok) {
           return res;
         } else {
           throw new Error(res.statusText);
         }
-      })
-        .then((negociacoesParaImportar: Negociacao[]) => {
-
-          const negociacoesJaImportadas = this._negociacoes.paraArray();
-
-          negociacoesParaImportar
-            .filter(negociacao =>
-               !negociacoesJaImportadas.some(jaImportada =>
-                 negociacao.ehIgual(jaImportada)))
-              .forEach(negociacao =>
-             this._negociacoes.adiciona(negociacao));
-
-            this._negociacoesView.update(this._negociacoes)
-      })
-      .catch(erro => {
-          this._mensagemView.update(erro.message);
       });
+      const negociacoesJaImportadas = this._negociacoes.paraArray();
+      
+      negociacoesParaImportar
+        .filter(
+          (negociacao) =>
+            !negociacoesJaImportadas.some((jaImportada) =>
+              negociacao.ehIgual(jaImportada)
+            )
+        )
+        .forEach((negociacao) => this._negociacoes.adiciona(negociacao));
+  
+      this._negociacoesView.update(this._negociacoes);
+      
+    } catch (error) {
+      this._mensagemView.update(error.message);
+    }
+
   }
 }
 
